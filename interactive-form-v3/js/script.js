@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
 // The Job Role section
 
-//let other = document.getElementsByName('title')[6].value
 
 let otherJobRole = document.querySelector('#other-job-role')
 otherJobRole.style.visibility = "hidden"
@@ -62,7 +61,6 @@ design.addEventListener('change', function(){
 //
 
 let registerForActivities = document.querySelector('#activities')
-let checkbox = document.getElementsByTagName("input").type == "checkbox"
 
 registerForActivities.addEventListener('change', function(){
     let total = 0
@@ -113,6 +111,8 @@ payWith.addEventListener("change", function(){
 //
 //
 
+let nameCheck = /^[A-Za-z]+$/
+
 let emailCheck = /^[A-Za-z90-9]+@[A-Za-z0-9]+\.com$/
 
 let creditCardCheck = /^[0-9]{13,16}$/
@@ -121,29 +121,20 @@ let zipCodeCheck = /^[0-9]{5}$/
 
 let cvvCheck = /^[0-9]{3}$/
 
-function validateName() {
-    let name = document.querySelector('#name')
-    let nameHint = document.querySelector('#name-hint')
-    if (name.value === ''){
-        nameHint.style.display = "block"
-        return false
-    }
-    else {
-        nameHint.style.display = "none"
+function validate(selector, validatorRegex) {
+    let inputElement = document.querySelector(selector)
+    let hintElement = inputElement.parentElement.lastElementChild
+    if (validatorRegex.test(inputElement.value)){
+        inputElement.parentElement.classList.add('valid')
+        inputElement.parentElement.classList.remove('not-valid')
+        hintElement.style.display = "none"
         return true
     }
-}
-
-function validateEmail() {
-    let email = document.querySelector('#email')
-    let emailHint = document.querySelector('#email-hint')
-    if (!emailCheck.test(email.value)){
-        emailHint.style.display = "block"
-        return false
-    }
     else {
-        emailHint.style.display = "none"
-        return true
+        inputElement.parentElement.classList.add('not-valid')
+        inputElement.parentElement.classList.remove('valid')
+        hintElement.style.display = "block"
+        return false
     }
 }
 
@@ -158,69 +149,33 @@ function validateActivities() {
         }
     }
 
-    if (totalActivities === 0){
-        activitiesHint.style.display = "block"
-        return false
-    }
-    else {
+    if (totalActivities > 0){
+        inputElement.parentElement.classList.add('valid')
+        inputElement.parentElement.classList.remove('not-valid')
         activitiesHint.style.display = "none"
         return true
     }
-}
-
-function validateCreditCardNumber() {
-    let creditCardNumber = document.querySelector('#cc-num')
-    let creditCardNumberHint = document.querySelector('#cc-hint')
-    console.log(creditCardNumber.value, creditCardCheck.test(creditCardNumber.value))
-    if (!creditCardCheck.test(creditCardNumber.value)){
-        creditCardNumberHint.style.display = "block"
-        return false
-    }
     else {
-        creditCardNumberHint.style.display = "none"
-        return true
-    }
-}
-
-function validateZipCode() {
-    let zipCode = document.querySelector('#zip')
-    let zipCodeHint = document.querySelector('#zip-hint')
-    if (!zipCodeCheck.test(zipCode.value)){
-        zipCodeHint.style.display = "block"
+        inputElement.parentElement.classList.add('not-valid')
+        inputElement.parentElement.classList.remove('valid')
+        activitiesHint.style.display = "block"
         return false
-    }
-    else {
-        zipCodeHint.style.display = "none"
-        return true
-    }
-}
-
-function validateCVV() {
-    let cvv = document.querySelector('#cvv')
-    let cvvHint = document.querySelector('#cvv-hint')
-    if (!cvvCheck.test(cvv.value)){
-        cvvHint.style.display = "block"
-        return false
-    }
-    else {
-        cvvHint.style.display = "none"
-        return true
     }
 }
 
 let formElement = document.querySelector('form')
 
 formElement.addEventListener("submit", function(e){
-    let nameValid = validateName()
-    let emailValid = validateEmail()
+    let nameValid = validate("#name", nameCheck)
+    let emailValid = validate("#email", emailCheck)
     let activitiesValid = validateActivities()
 
     let payWith = document.querySelector('#payment')
     let creditCardValid = true
     if (payWith.value === 'credit-card') {
-        let creditCardNumberValid = validateCreditCardNumber()
-        let zipCodeValid = validateZipCode()
-        let cvvValid = validateCVV()
+        let creditCardNumberValid = validate("#cc-num", creditCardCheck)
+        let zipCodeValid = validate("#zip", zipCodeCheck)
+        let cvvValid = validate("#cvv", cvvCheck)
         creditCardValid = creditCardNumberValid && zipCodeValid && cvvValid
     }
 
@@ -237,3 +192,87 @@ formElement.addEventListener("submit", function(e){
 //
 //
 
+
+let allCheckboxes = document.querySelectorAll('input[type = checkbox]')
+
+allCheckboxes.forEach(checkbox => {
+
+    checkbox.addEventListener('focus', function(){
+        checkbox.parentElement.classList.add('focus')
+    } )
+    
+    
+    checkbox.addEventListener('blur', function(){
+        checkbox.parentElement.classList.remove('focus')
+
+    } )
+})
+
+
+
+//
+//
+// 1. Prevent users from registering for conflicting activities
+//
+//
+
+let registerForActivities2 = document.querySelector('#activities')
+
+registerForActivities2.addEventListener('change', function(e){
+    let activities = document.querySelectorAll('input[type=checkbox]')
+    let eventTime = e.target.getAttribute('data-day-and-time')
+    let eventSelected = e.target.checked
+
+    for(let i = 0; i < activities.length; i++){
+        let otherEventTime = activities[i].getAttribute('data-day-and-time')
+        if (eventTime === otherEventTime && activities[i] !== e.target){
+            if(eventSelected){
+                activities[i].parentElement.classList.add('disabled')
+                activities[i].disabled = true
+            }
+            else {
+                activities[i].parentElement.classList.remove('disabled')
+                activities[i].disabled = false
+            }
+        }
+    }
+})
+
+
+//
+//
+// 2. Real-time error message
+//
+//
+
+let nameInput = document.querySelector('#name')
+let emailInput = document.querySelector('#email')
+
+
+nameInput.addEventListener('keyup', function(){
+    validate('#name', nameCheck)
+})
+
+
+emailInput.addEventListener('keyup', function(){
+    validate('#email', emailCheck)
+})
+
+//
+//
+// 3. Conditional error message
+//
+//
+let emailHint = document.querySelector('#email-hint')
+let emailInput2 = document.querySelector('#email')
+emailInput2.addEventListener('keyup', function(){
+    if(!emailInput2.value.endsWith('.com')){
+        emailHint.innerHTML = "Email address must end in .com"
+    }
+    else if(!emailInput2.value.includes('@') ){
+        emailHint.innerHTML = "Email address must include an @ symbol"
+    }
+    else{
+        emailHint.innerHTML = 'Email address must be formatted correctly'
+    }
+})
