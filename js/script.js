@@ -1,15 +1,22 @@
 //console.log("Test lol")
 
-
+//
+//
 //The Name Field
+//
+//
 
 document.addEventListener('DOMContentLoaded', function(){
     let focusedName = document.querySelector('input#name')
     focusedName.focus()
 })
 
-// The Job Role section
 
+//
+//
+// The Job Role section
+//
+//
 
 let otherJobRole = document.querySelector('#other-job-role')
 otherJobRole.style.visibility = "hidden"
@@ -142,6 +149,8 @@ function validateActivities() {
     let activities = document.querySelectorAll('input[type=checkbox]')
     let activitiesHint = document.querySelector('#activities-hint')
 
+    let activitiesFieldset = document.querySelector('#activities')
+
     let totalActivities = 0;
     for(let i = 0; i < activities.length; i++){
         if(activities[i].checked){
@@ -150,14 +159,14 @@ function validateActivities() {
     }
 
     if (totalActivities > 0){
-        inputElement.parentElement.classList.add('valid')
-        inputElement.parentElement.classList.remove('not-valid')
+        activitiesFieldset.classList.add('valid')
+        activitiesFieldset.classList.remove('not-valid')
         activitiesHint.style.display = "none"
         return true
     }
     else {
-        inputElement.parentElement.classList.add('not-valid')
-        inputElement.parentElement.classList.remove('valid')
+        activitiesFieldset.classList.add('not-valid')
+        activitiesFieldset.classList.remove('valid')
         activitiesHint.style.display = "block"
         return false
     }
