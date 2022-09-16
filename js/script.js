@@ -45,9 +45,22 @@ color.disabled = true
 
 let design = document.querySelector('#design')
 
+//When one of the themes is selected, only the colors matching that theme should be available to select. And if a color is selected, then the theme is changed again, the color should also change to the associated theme.
 design.addEventListener('change', function(){
     color.disabled = false
     let selectedTheme = design.options[design.selectedIndex]
+    let selectedColor = color.options[color.selectedIndex]
+    let selectedColorTheme = selectedColor.getAttribute('data-theme')
+
+    if(selectedColorTheme !== selectedTheme.value) {
+        for(let option of color.options) {
+            let optionTheme = option.getAttribute('data-theme')
+            if(optionTheme === selectedTheme.value) {
+                color.value = option.value
+                break
+            }
+        }
+    }
 
     for (let option of color.options) {
         let optionTheme = option.getAttribute('data-theme')
@@ -173,24 +186,30 @@ function validateActivities() {
 }
 
 let formElement = document.querySelector('form')
-
+//added a try/catch to make sure the form never submits if there's an error
 formElement.addEventListener("submit", function(e){
-    let nameValid = validate("#name", nameCheck)
-    let emailValid = validate("#email", emailCheck)
-    let activitiesValid = validateActivities()
+    try {
+        let nameValid = validate("#name", nameCheck)
+        let emailValid = validate("#email", emailCheck)
+        let activitiesValid = validateActivities()
 
-    let payWith = document.querySelector('#payment')
-    let creditCardValid = true
-    if (payWith.value === 'credit-card') {
-        let creditCardNumberValid = validate("#cc-num", creditCardCheck)
-        let zipCodeValid = validate("#zip", zipCodeCheck)
-        let cvvValid = validate("#cvv", cvvCheck)
-        creditCardValid = creditCardNumberValid && zipCodeValid && cvvValid
+        let payWith = document.querySelector('#payment')
+        let creditCardValid = true
+        if(payWith.value === 'credit-card') {
+            let creditCardNumberValid = validate("#cc-num", creditCardCheck)
+            let zipCodeValid = validate("#zip", zipCodeCheck)
+            let cvvValid = validate("#cvv", cvvCheck)
+            creditCardValid = creditCardNumberValid && zipCodeValid && cvvValid
+        }
+
+        let formValid = nameValid && emailValid && activitiesValid && creditCardValid
+        if(!formValid) {
+            e.preventDefault()
+        }
     }
-
-    let formValid = nameValid && emailValid && activitiesValid && creditCardValid
-    if (!formValid) {
+    catch (error) {
         e.preventDefault()
+        console.error(error)
     }
 })
 
